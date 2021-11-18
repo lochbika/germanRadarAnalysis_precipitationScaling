@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# DWD data
+data/DWD/*_hist.zip
+DWDdata/

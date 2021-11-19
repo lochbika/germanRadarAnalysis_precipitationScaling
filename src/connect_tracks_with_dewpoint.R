@@ -29,15 +29,15 @@ trackstationids <-
   trackstationids.ordered <- trackstationids
   
   for (i in seq_len(nrow(trackstationids)))
-    trackstationids.ordered[i,] <-
-    trackstationids[i, order(trackstationdistance[i, ])]
+    trackstationids.ordered[i, ] <-
+    trackstationids[i, order(trackstationdistance[i,])]
   }
 {
   trackstationdistance.ordered <- trackstationdistance
   
   for (i in seq_len(nrow(trackstationdistance)))
-    trackstationdistance.ordered[i,] <-
-    trackstationdistance[i, order(trackstationdistance[i, ])]
+    trackstationdistance.ordered[i, ] <-
+    trackstationdistance[i, order(trackstationdistance[i,])]
 }
 rm(trackstationdistance, trackstationids)
 
@@ -65,67 +65,38 @@ ahead_time <-
              tz = "UTC",
              origin = "1970-01-01 00:00")
 
-# use the following for debugging the function below
-# track <- 50000
-# tracktime <- ahead_time[track]
-# TdData <- stationdataTD
-# TrackStationIDs <- tracksandstations[["stationIDs"]][track, ]
-# TrackStationDists <- tracksandstations[["distances"]][track, ]
-
-getTdforTrack <-
-  function(tracktime,
-           TdData,
-           TrackStationIDs,
-           TrackStationDists) {
-    # temporary store station data in new object
-    trystation <- 1
+tracks.database$Td_value <- rep(NA, dim(tracks.database)[1])
+tracks.database$Td_distance <- rep(NA, dim(tracks.database)[1])
+for (track in 1:dim(tracks.database)[1]) {
+  if (track %% 1000 == 0)
+    print(track)
+  # temporary store station data in new object
+  trystation <- 1
+  temp <-
+    stationdataTD[[as.character(tracksandstations[["stationIDs"]][track, trystation])]]
+  selectedTd <- temp$TD[temp$datetime == ahead_time[track]]
+  selectedDist <-
+    tracksandstations[["distances"]][track, trystation]
+  while ((length(selectedTd) == 0 |
+          isTRUE(is.na(selectedTd))) & trystation < 10) {
+    trystation <- trystation + 1
     temp <-
-      TdData[[as.character(TrackStationIDs[trystation])]]
-    selectedTd <- temp$TD[temp$datetime == tracktime]
+      stationdataTD[[as.character(tracksandstations[["stationIDs"]][track, trystation])]]
+    selectedTd <- temp$TD[temp$datetime == ahead_time[track]]
     selectedDist <-
-      TrackStationDists[trystation]
-    while ((length(selectedTd) == 0 |
-            isTRUE(is.na(selectedTd))) &
-           trystation < length(TrackStationIDs)) {
-      trystation <- trystation + 1
-      temp <-
-        TdData[[as.character(TrackStationIDs[trystation])]]
-      selectedTd <- temp$TD[temp$datetime == tracktime]
-      selectedDist <-
-        TrackStationDists[trystation]
-    }
-    if (length(selectedTd) == 0 |
-        isTRUE(is.na(selectedTd))) {
-      return(c(NA, NA))
-    } else{
-      return(c(selectedTd, selectedDist))
-    }
+      tracksandstations[["distances"]][track, trystation]
   }
+  if (length(selectedTd) == 0 |
+      isTRUE(is.na(selectedTd))) {
+    tracks.database$Td_value[track] <- NA
+    tracks.database$Td_distance[track] <- NA
+  } else{
+    tracks.database$Td_value[track] <- selectedTd
+    tracks.database$Td_distance[track] <- selectedDist
+  }
+}
 
-registerDoFuture()
-plan(multicore)
-options(future.globals.maxSize = 2097152000 * 2)
-
-tic()
-# start filling it
-track.iter <- 1:dim(tracks.database)[1]
-with_progress({
-  p <- progressor(along = track.iter)
-  tracks.Td <-
-    foreach (track = track.iter,
-             .combine = "rbind",
-             .errorhandling = "pass",
-             .options.future = list(scheduling = 1.0)) %dopar% {
-               p()
-               getTdforTrack(ahead_time[track],
-                             stationdataTD,
-                             tracksandstations[["stationIDs"]][track,],
-                             tracksandstations[["distances"]][track, ])
-             }
-})
-toc()
 
 # update tracks file
-save(tracks.database,
-     file = paste(dir_data, "tracks.database.RData", sep =
-                    ""))
+save(tracks.database, file = paste(dir_data, "tracks.database.RData", sep =
+                                   ""))

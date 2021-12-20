@@ -21,5 +21,14 @@ Always run the src/setup_working_environment.R script at least once in each new 
 Open the RStudio project file in RStudio or use your favorite way of running R scripts.
 
 1. run or source the src/setup_working_environment.R script
-2. run the src/prepare_station_data_cloud_type.R script to download the DWD data and create a tailored station data set
-3. finally run the src/create_gridded_CS_type_dataset.R script to produce the gridded precipitation type data set
+2. run the src/prepare_station_data_dew_point.R script to download the DWD data and create a tailored station data set
+3. finally run the src/connect_tracks_with_dewpoint.R script to produce to connect each track with a co-located dew point record (3 hours prior to the event)
+
+# Basic information about connected station records
+
+The src/plot_overview.R script produces a few basic plots with the (cumulative) distributions of the distance of the connected station records and the actual dew point temperature of each track
+If the plots/ directory does not exist yet, create it.
+
+1. run or source the src/setup_working_environment.R script
+2. run the src/plot_overview.R script to produce the plots
+3. the generated plots are in the plots/ directory

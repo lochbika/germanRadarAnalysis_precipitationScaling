@@ -17,7 +17,7 @@ months.selected <- matrix(months, ncol = 3, byrow = TRUE)
 # label the seasons
 tracks.database$season <- ""
 for (season in 1:3) {
-  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season, ]] <-
+  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season,]] <-
     seasons[season]
 }
 
@@ -45,7 +45,7 @@ pl <-
     legend.key.height = unit(.5, "line"),
     axis.title.y = element_text(size = pl.basesize)
   )
-#pl
+
 ggsave(
   paste(dir_plots, "Td_distance_dist_by_season.png", sep = ""),
   plot = pl,
@@ -95,12 +95,18 @@ cumdist.distance <-
     na.rm = TRUE
   )
 cumdist.distance <- melt(cumdist.distance$x)
-colnames(cumdist.distance) <- c("season","percentile","distance")
-cumdist.distance$percentile <- rep(prct,each=3)*100
+colnames(cumdist.distance) <- c("season", "percentile", "distance")
+cumdist.distance$percentile <- rep(prct, each = 3) * 100
 cumdist.distance$season <- seasons[cumdist.distance$season]
 
-# plot
-pl <- ggplot(cumdist.distance, aes(x = distance, y = percentile, group=season,color=season)) +
+pl <-
+  ggplot(cumdist.distance,
+         aes(
+           x = distance,
+           y = percentile,
+           group = season,
+           color = season
+         )) +
   geom_path() +
   xlab("distance [km]") +
   ylab("percentile [%]") +
@@ -140,12 +146,19 @@ cumdist.Td <-
     na.rm = TRUE
   )
 cumdist.Td <- melt(cumdist.Td$x)
-colnames(cumdist.Td) <- c("season","percentile","Td")
-cumdist.Td$percentile <- rep(prct,each=3)*100
+colnames(cumdist.Td) <- c("season", "percentile", "Td")
+cumdist.Td$percentile <- rep(prct, each = 3) * 100
 cumdist.Td$season <- seasons[cumdist.Td$season]
 
 
-pl <- ggplot(cumdist.Td, aes(x = Td, y = percentile, color=season, group=season)) +
+pl <-
+  ggplot(cumdist.Td,
+         aes(
+           x = Td,
+           y = percentile,
+           color = season,
+           group = season
+         )) +
   geom_line() +
   xlab(expression(paste(T[d], " [", degree, "C]"))) +
   ylab("percentile [%]") +
@@ -173,4 +186,3 @@ ggsave(
   height = 8,
   units = "cm"
 )
-

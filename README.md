@@ -16,7 +16,7 @@ Make sure to adjust your working directory in the src/setup_working_environment.
 
 Always run the src/setup_working_environment.R script at least once in each new R session before executing any other code.
 
-# Connect events to (dew point) temperature data
+# Connect events to dew point and precipitation type data
 
 Open the RStudio project file in RStudio or use your favorite way of running R scripts.
 
@@ -25,11 +25,5 @@ Open the RStudio project file in RStudio or use your favorite way of running R s
 3. run the src/connect_tracks_with_dewpoint.R script to connect each track with a co-located dew point record (3 hours prior to the event)
 4. finally, run the src/connect_tracks_with_gridded_precipitationtype.R. This will add the precipitation type criteria to the tracks database.
 
-# Basic information about connected station records
-
-The src/plot_overview.R script produces a few basic plots with the (cumulative) distributions of the distance of the connected station records and the actual dew point temperature of each track
-If the plots/ directory does not exist yet, create it.
-
-1. run or source the src/setup_working_environment.R script
-2. run the src/plot_overview.R script to produce the plots
-3. the generated plots are in the plots/ directory
+## The final data set
+The final data set can be downloaded from [here](https://drive.google.com/file/d/1it0pPeHJFlsJMPNB52cfC6r1x-AkZ0TU/view?usp=sharing)

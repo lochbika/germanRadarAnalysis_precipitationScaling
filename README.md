@@ -22,7 +22,8 @@ Open the RStudio project file in RStudio or use your favorite way of running R s
 
 1. run or source the src/setup_working_environment.R script
 2. run the src/prepare_station_data_dew_point.R script to download the DWD data and create a tailored station data set
-3. finally run the src/connect_tracks_with_dewpoint.R script to produce to connect each track with a co-located dew point record (3 hours prior to the event)
+3. run the src/connect_tracks_with_dewpoint.R script to connect each track with a co-located dew point record (3 hours prior to the event)
+4. finally, run the src/connect_tracks_with_gridded_precipitationtype.R. This will add the precipitation type criteria to the tracks database.
 
 # Basic information about connected station records
 

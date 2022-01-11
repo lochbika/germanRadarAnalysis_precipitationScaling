@@ -21,6 +21,18 @@ for (season in 1:3) {
     seasons[season]
 }
 
+# convert cloud types to factors
+tracks.database$CS_grid_valueQ1 <- factor(tracks.database$CS_grid_valueQ1, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
+tracks.database$CS_grid_valueQ2 <- factor(tracks.database$CS_grid_valueQ2, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
+
+# convert season to factor
+tracks.database$season <- factor(tracks.database$season, levels = c("spring","summer","autumn"))
+
+# remove missing entries (Td and cloud type)
+missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ1)
+print(paste("Number of missing values:", sum(missingEntries), sum(missingEntries)/dim(tracks.database)[1]*100, "%"))
+tracks.database <- tracks.database[!(missingEntries), ]
+
 #
 # plot descriptive stats about dew point temperature
 #

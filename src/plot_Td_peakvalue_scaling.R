@@ -9,44 +9,54 @@ load(file = paste(dir_data, "tracks.database.RData", sep = ""))
 colors <- brewer.pal(5, "Set1")
 
 # do the analysis for specific months
-#months.selected <- months
 months.selected <- matrix(months, ncol = 3, byrow = TRUE)
+
+# label the seasons
+tracks.database$season <- ""
+for (season in 1:3) {
+  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season,]] <-
+    seasons[season]
+}
+
+# convert cloud types to factors
+tracks.database$CS_grid_valueQ1 <- factor(tracks.database$CS_grid_valueQ1, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
+tracks.database$CS_grid_valueQ2 <- factor(tracks.database$CS_grid_valueQ2, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
+
+# convert season to factor
+tracks.database$season <- factor(tracks.database$season, levels = c("spring","summer","autumn"))
+
+# remove missing entries (Td and cloud type)
+missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ1)
+print(paste("Number of missing values:", sum(missingEntries), sum(missingEntries)/dim(tracks.database)[1]*100, "%"))
+tracks.database <- tracks.database[!(missingEntries), ]
 
 for (season in 1:dim(months.selected)[1]) {
   # select tracks by function
-  tracks.selected <-
-    selectTracks(
-      tracks.global,
-      months.selected[season,],
-      Td.range,
-      dewpoint_stationradius,
-      maxduration,
-      track_mindist
-    )
-  
-  tracks.selected <- tracks.selected[tracks.selected$CS_grid_valueQ2 == 1,]
+  tracks.selected <- tracks.database[tracks.database$season==seasons[season] &
+                                       format(tracks.database$datetime, "%Y") %in% c("2007","2008"),]
   
   # bin Td data
   Td.bins <-
-    binequal(tracks.selected$Td_value, n = 10000, members = TRUE)
+    binequal(tracks.selected$Td_value, n = 2500, members = TRUE)
   
   # calculate percentiles for each Td bin
-  prct <- c(.9, .95, .975, .99)
+  prct <- c(.95, .975, .99, .995)
   scaling <-
     aggregate(
       tracks.selected$peakvalue,
       FUN = quantile,
       type = 5,
       probs = prct,
-      by = list(Td.bins$classes)
+      by = list(Td.bins$classes, tracks.selected$CS_grid_valueQ2)
     )
   
-  scaling$Group.1 <- Td.bins$bmean[, 2]
+  scaling$Group.1 <- Td.bins$bmean[scaling$Group.1, 2]
   
   scaling.df <- data.frame(value = as.vector(scaling$x))
   scaling.df$Td <- rep(scaling$Group.1, length(prct))
+  scaling.df$precipType <- rep(scaling$Group.2, length(prct))
   scaling.df$percentile <-
-    rep(paste("p", prct * 100, sep = ""), each = dim(Td.bins$bmean)[1])
+    rep(paste("p", prct * 100, sep = ""), each = dim(Td.bins$bmean)[1]*3)
   
   #############
   ######
@@ -55,7 +65,7 @@ for (season in 1:dim(months.selected)[1]) {
   #############
   
   ## create a data frame with values for the scaling lines
-  x <- seq(min(scaling.df$Td) - 2, max(scaling.df$Td) + 2, .1)
+  x <- seq(3, 22, .1)
   y <- exp(0.07 * x - 5)
   scal.lines <- cbind(lin = rep(-5, length(x)),
                       x = x,
@@ -82,6 +92,7 @@ for (season in 1:dim(months.selected)[1]) {
         color = percentile
       )
     ) + geom_point(size = 1) +
+    facet_grid(rows = vars(precipType)) +
     theme_bw(base_size = pl.basesize) +
     theme(
       panel.spacing = unit(0, "line"),
@@ -100,9 +111,9 @@ for (season in 1:dim(months.selected)[1]) {
     ) +
     scale_y_continuous(
       trans = "log",
-      limits = c(0.5, 15),
-      breaks = seq(.5, 15, 2),
-      labels = seq(.5, 15, 2)
+      limits = c(0.5, 25),
+      breaks = seq(.5, 25, 5),
+      labels = seq(.5, 25, 5)
     ) + geom_smooth(
       method = "lm",
       se = T,
@@ -119,19 +130,19 @@ for (season in 1:dim(months.selected)[1]) {
     ) +
     xlim(5, 20)
   
-  pl.scal.cell
+  #pl.scal.cell
   
   ggsave(
     plot = pl.scal.cell,
     filename = paste(
       dir_plots,
       "scaling_",
-      paste(months.names[months %in% months.selected[season, ]], collapse = "-"),
+      seasons[season],
       ".png",
       sep = ""
     ) ,
     width = 6.5,
-    height = 8,
+    height = 12,
     units = "cm"
   )
 }

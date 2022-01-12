@@ -25,5 +25,5 @@ Open the RStudio project file in RStudio or use your favorite way of running R s
 3. run the src/connect_tracks_with_dewpoint.R script to connect each track with a co-located dew point record (3 hours prior to the event)
 4. finally, run the src/connect_tracks_with_gridded_precipitationtype.R. This will add the precipitation type criteria to the tracks database.
 
-## The final data set
-The final data set can be downloaded from [here](https://drive.google.com/file/d/1it0pPeHJFlsJMPNB52cfC6r1x-AkZ0TU/view?usp=sharing)
+# The final data set
+The final data set can be downloaded from [here.](https://drive.google.com/file/d/1it0pPeHJFlsJMPNB52cfC6r1x-AkZ0TU/view?usp=sharing)

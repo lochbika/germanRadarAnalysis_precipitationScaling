@@ -2,7 +2,7 @@
 # directories
 #
 
-setwd("/home/kai/Documents/germanRadarAnalysis_precipitationScaling/")
+setwd("/home/rstudio/germanRadarAnalysis_precipitationScaling/")
 
 dir_plots <- "plots/"
 dir_data <- "data/"
@@ -10,19 +10,12 @@ dir_data <- "data/"
 #
 # constants
 #
-
-track_mindur <- 3  # 3 timesteps = 15 minutes
-track_mindist <- 5 # km
 dewpoint_timebeforeevent <- 3 #hours
-dewpoint_stationradius <- 40 #km
-maxduration <- 180
-Td.min <- 5 #degC
-Td.max <- 50
-Td.range <- c(Td.min, Td.max)
-area.min <- 0 # km^2
-area.max <- 100 ** 2
+dewpoint_stationradius <- 25 * 1000 #km
+maxduration <- 24 # time steps (in 5 minute units)
+precipitationTypes <- c("mixed", "convective", "stratiform")
 
-# for which years and months?
+# months, years and seasons
 years  <- as.character(seq(2001, 2020))
 months <- sprintf(seq(3, 11), fmt = "%02g")
 months.names <-
@@ -40,7 +33,7 @@ pl.basesize <- 8
 #
 
 # bin data with either constant or varying bin size
-binequal <- function(x, n = 5, members = FALSE) {
+binequal <- function(x, n = 5, fixed.width = NULL, members = FALSE) {
   # x: data to be binned
   # get range
   rng <- range(x, na.rm = T)

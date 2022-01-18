@@ -43,7 +43,7 @@ pl <-
   ggplot(tracks.database,
          aes(x = Td_distance, group = season, color = season)) +
   geom_freqpoly(bins = 100) +
-  geom_freqpoly(data=tracks.database, bins = 100, aes(x=Td_distance), inherit.aes = FALSE) +
+  geom_freqpoly(data=tracks.database, bins = 100, aes(x=Td_distance, color = "all"), inherit.aes = FALSE) +
   xlab("distance [km]") +
   theme_bw(base_size = pl.basesize) +
   theme(
@@ -73,7 +73,7 @@ ggsave(
 pl <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
-  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value), inherit.aes = FALSE) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value, color = "all"), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   theme_bw(base_size = pl.basesize) +
   theme(

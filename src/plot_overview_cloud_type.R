@@ -94,7 +94,7 @@ tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% a
 pl.TdQ1 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
-  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value), inherit.aes = FALSE) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value, color = "all"), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ1)) +
   ylim(0,15000) +
@@ -104,8 +104,8 @@ pl.TdQ1 <-
     strip.background = element_blank(),
     strip.placement = 'outside',
     strip.text = element_text(size = pl.basesize),
-    legend.position = "None",
-    legend.justification = c("right", "top"),
+    legend.position = c(0, 0.36),
+    legend.justification = c("left", "top"),
     legend.background = element_blank(),
     plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
     axis.text = element_text(size = pl.basesize),
@@ -161,7 +161,7 @@ ggsave(
 pl.TdQ2 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
-  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value), inherit.aes = FALSE) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value, color = "all"), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ2)) +
   ylim(0,15000) +
@@ -220,7 +220,7 @@ Td.freq.all$season <- "all"
 pl <-
   ggplot(Td.freq, aes(x = Td_value, y=diff, group = season, color = season)) +
   geom_path() +
-  geom_path(data=Td.freq.all, aes(x=Td_value, y=diff), inherit.aes = FALSE) +
+  geom_path(data=Td.freq.all, aes(x=Td_value, y=diff, color = "all"), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(precType)) +
   ylim(-4500, 4500) +

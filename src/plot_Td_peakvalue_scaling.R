@@ -54,6 +54,9 @@ tracks.database <- tracks.database[tracks.database$duration <= maxduration,]
 # restrict analysis to 2001 to 2015
 tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]
 
+# Td must be at least 0 degC
+tracks.database <- tracks.database[tracks.database$Td_value>=0,]
+
 #
 # first all in one; do not distinguish between precipitation types
 #
@@ -82,7 +85,7 @@ scaling.df$percentile <-
   rep(paste("p", prct * 100, sep = ""), each = dim(Td.bins$bmean)[1])
 
 ## create a data frame with values for the scaling lines
-x <- seq(3, 22, .1)
+x <- seq(-1, 25, .1)
 y <- exp(0.07 * x - 5)
 scal.lines <- cbind(lin = rep(-5, length(x)),
                     x = x,
@@ -144,7 +147,7 @@ pl.scal.cell <-
     col = "grey",
     linetype = 2
   ) +
-  xlim(5, 20)
+  xlim(0, 20)
 
 #pl.scal.cell
 
@@ -200,7 +203,7 @@ scaling.df <- scaling.final
 rm(scaling.final)
 
 ## create a data frame with values for the scaling lines
-x <- seq(3, 22, .1)
+x <- seq(-1, 25, .1)
 y <- exp(0.07 * x - 5)
 scal.lines <- cbind(lin = rep(-5, length(x)),
                     x = x,
@@ -263,7 +266,7 @@ pl.scal.cell <-
     col = "grey",
     linetype = 2
   ) +
-  xlim(5, 20)
+  xlim(0, 20)
 
 #pl.scal.cell
 

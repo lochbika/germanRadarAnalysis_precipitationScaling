@@ -5,9 +5,6 @@ library(RColorBrewer)
 # load saved tracks file
 load(file = paste(dir_data, "tracks.database.RData", sep = ""))
 
-# convert distance to km
-tracks.database$Td_distance <- tracks.database$Td_distance / 1000
-
 # colors for scaling diagram
 colors <- brewer.pal(5, "Set1")
 
@@ -17,21 +14,42 @@ months.selected <- matrix(months, ncol = 3, byrow = TRUE)
 # label the seasons
 tracks.database$season <- ""
 for (season in 1:3) {
-  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season,]] <-
+  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season, ]] <-
     seasons[season]
 }
 
-# convert cloud types to factors
-tracks.database$CS_grid_valueQ1 <- factor(tracks.database$CS_grid_valueQ1, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
-tracks.database$CS_grid_valueQ2 <- factor(tracks.database$CS_grid_valueQ2, levels = c(0,1,2), labels = c("mixed", "convective", "stratiform"))
+# convert precipitation types to factors
+tracks.database$CS_grid_valueQ1 <-
+  factor(tracks.database$CS_grid_valueQ1,
+         levels = c(0, 1, 2),
+         labels = precipitationTypes)
+tracks.database$CS_grid_valueQ2 <-
+  factor(tracks.database$CS_grid_valueQ2,
+         levels = c(0, 1, 2),
+         labels = precipitationTypes)
 
 # convert season to factor
-tracks.database$season <- factor(tracks.database$season, levels = c("spring","summer","autumn"))
+tracks.database$season <-
+  factor(tracks.database$season, levels = c("spring", "summer", "autumn"))
 
-# remove missing entries (Td and cloud type)
-missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ2)
-print(paste("Number of missing values:", sum(missingEntries), sum(missingEntries)/dim(tracks.database)[1]*100, "%"))
-tracks.database <- tracks.database[!(missingEntries), ]
+# remove missing entries (Td and precipitation type)
+missingEntries <-
+  is.na(tracks.database$Td_value) |
+  is.na(tracks.database$CS_grid_valueQ1) |
+  is.na(tracks.database$CS_grid_valueQ1)
+print(paste(
+  "Number of missing values:",
+  sum(missingEntries),
+  sum(missingEntries) / dim(tracks.database)[1] * 100,
+  "%"
+))
+tracks.database <- tracks.database[!(missingEntries),]
+
+# use only tracks that have a Td_distance < 25km
+tracks.database <-
+  tracks.database[tracks.database$Td_distance <= dewpoint_stationradius,]
+# use only tracks that are up to 2 hours long
+tracks.database <- tracks.database[tracks.database$duration <= maxduration,]
 
 # restrict analysis to 2001 to 2015
 tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]
@@ -41,43 +59,45 @@ tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% a
 # taking precipitation type into account
 #
 
-pl <-
-  ggplot(tracks.database,
-         aes(x = Td_distance, group = season, color = season)) +
-  geom_freqpoly(bins = 100) +
-  xlab("distance [km]") + 
-  facet_grid(rows = vars(CS_grid_valueQ1)) +
-  theme_bw(base_size = pl.basesize) +
-  theme(
-    panel.spacing = unit(0, "line"),
-    strip.background = element_blank(),
-    strip.placement = 'outside',
-    strip.text = element_text(size = pl.basesize),
-    legend.position = c(1, 1),
-    legend.justification = c("right", "top"),
-    legend.background = element_blank(),
-    plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
-    axis.text = element_text(size = pl.basesize),
-    legend.title = element_blank(),
-    legend.text = element_text(size = pl.basesize),
-    legend.key.height = unit(.5, "line"),
-    axis.title.y = element_text(size = pl.basesize)
-  )
-
-ggsave(
-  paste(dir_plots, "Td_distance_dist_by_precipTypeQ1_season.png", sep = ""),
-  plot = pl,
-  width = 6,
-  height = 8,
-  units = "cm"
-)
+# pl <-
+#   ggplot(tracks.database,
+#          aes(x = Td_distance, group = season, color = season)) +
+#   geom_freqpoly(bins = 100) +
+#   geom_freqpoly(data=tracks.database, bins = 100, aes(x=Td_distance), inherit.aes = FALSE) +
+#   xlab("distance [km]") + 
+#   facet_grid(rows = vars(CS_grid_valueQ1)) +
+#   theme_bw(base_size = pl.basesize) +
+#   theme(
+#     panel.spacing = unit(0, "line"),
+#     strip.background = element_blank(),
+#     strip.placement = 'outside',
+#     strip.text = element_text(size = pl.basesize),
+#     legend.position = c(1, 1),
+#     legend.justification = c("right", "top"),
+#     legend.background = element_blank(),
+#     plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
+#     axis.text = element_text(size = pl.basesize),
+#     legend.title = element_blank(),
+#     legend.text = element_text(size = pl.basesize),
+#     legend.key.height = unit(.5, "line"),
+#     axis.title.y = element_text(size = pl.basesize)
+#   )
+# 
+# ggsave(
+#   paste(dir_plots, "Td_distance_dist_by_precipTypeQ1_season.png", sep = ""),
+#   plot = pl,
+#   width = 6,
+#   height = 8,
+#   units = "cm"
+# )
 
 pl.TdQ1 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ1)) +
-  ylim(0,15500) +
+  ylim(0,15000) +
   theme_bw(base_size = pl.basesize) +
   theme(
     panel.spacing = unit(0, "line"),
@@ -107,43 +127,44 @@ ggsave(
 # taking precipitation type into account
 #
 
-pl <-
-  ggplot(tracks.database,
-         aes(x = Td_distance, group = season, color = season)) +
-  geom_freqpoly(bins = 100) +
-  xlab("distance [km]") + 
-  facet_grid(rows = vars(CS_grid_valueQ2)) +
-  theme_bw(base_size = pl.basesize) +
-  theme(
-    panel.spacing = unit(0, "line"),
-    strip.background = element_blank(),
-    strip.placement = 'outside',
-    strip.text = element_text(size = pl.basesize),
-    legend.position = c(1, 1),
-    legend.justification = c("right", "top"),
-    legend.background = element_blank(),
-    plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
-    axis.text = element_text(size = pl.basesize),
-    legend.title = element_blank(),
-    legend.text = element_text(size = pl.basesize),
-    legend.key.height = unit(.5, "line"),
-    axis.title.y = element_text(size = pl.basesize)
-  )
-
-ggsave(
-  paste(dir_plots, "Td_distance_dist_by_precipTypeQ2_season.png", sep = ""),
-  plot = pl,
-  width = 6,
-  height = 8,
-  units = "cm"
-)
+# pl <-
+#   ggplot(tracks.database,
+#          aes(x = Td_distance, group = season, color = season)) +
+#   geom_freqpoly(bins = 100) +
+#   xlab("distance [km]") + 
+#   facet_grid(rows = vars(CS_grid_valueQ2)) +
+#   theme_bw(base_size = pl.basesize) +
+#   theme(
+#     panel.spacing = unit(0, "line"),
+#     strip.background = element_blank(),
+#     strip.placement = 'outside',
+#     strip.text = element_text(size = pl.basesize),
+#     legend.position = c(1, 1),
+#     legend.justification = c("right", "top"),
+#     legend.background = element_blank(),
+#     plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
+#     axis.text = element_text(size = pl.basesize),
+#     legend.title = element_blank(),
+#     legend.text = element_text(size = pl.basesize),
+#     legend.key.height = unit(.5, "line"),
+#     axis.title.y = element_text(size = pl.basesize)
+#   )
+# 
+# ggsave(
+#   paste(dir_plots, "Td_distance_dist_by_precipTypeQ2_season.png", sep = ""),
+#   plot = pl,
+#   width = 6,
+#   height = 8,
+#   units = "cm"
+# )
 
 pl.TdQ2 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=Td_value), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ2)) +
-  ylim(0,15500) +
+  ylim(0,15000) +
   theme_bw(base_size = pl.basesize) +
   theme(
     panel.spacing = unit(0, "line"),
@@ -188,14 +209,21 @@ Td.freqQ2 <- table(tracks.database$Td.bins, tracks.database$season, tracks.datab
 Td.freq <- melt(Td.freqQ1)
 Td.freq$value <- melt(Td.freqQ2)$value - Td.freq$value
 
-colnames(Td.freq) <- c("Td_value", "season", "precType", "count")
+colnames(Td.freq) <- c("Td_value", "season", "precType", "diff")
+
+# add data for all seasons
+Td.freq.all <- apply(Td.freqQ2,MARGIN=c(1,3),FUN=sum) - apply(Td.freqQ1,MARGIN=c(1,3),FUN=sum)
+Td.freq.all <- melt(Td.freq.all)
+colnames(Td.freq.all) <- c("Td_value", "precType", "diff")
+Td.freq.all$season <- "all"
 
 pl <-
-  ggplot(Td.freq, aes(x = Td_value, y=count, group = season, color = season)) +
-  geom_path(binwidth = 0.3) +
+  ggplot(Td.freq, aes(x = Td_value, y=diff, group = season, color = season)) +
+  geom_path() +
+  geom_path(data=Td.freq.all, aes(x=Td_value, y=diff), inherit.aes = FALSE) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(precType)) +
-  ylim(-4000, 4000) +
+  ylim(-4500, 4500) +
   theme_bw(base_size = pl.basesize) +
   theme(
     panel.spacing = unit(0, "line"),

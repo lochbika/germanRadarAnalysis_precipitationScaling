@@ -47,9 +47,9 @@ tracks.database <- tracks.database[!(missingEntries),]
 
 # use only tracks that have a Td_distance < 25km
 tracks.database <-
-  tracks.database[tracks.database$Td_distance <= 25000,]
+  tracks.database[tracks.database$Td_distance <= dewpoint_stationradius,]
 # use only tracks that are up to 2 hours long
-tracks.database <- tracks.database[tracks.database$duration <= 24,]
+tracks.database <- tracks.database[tracks.database$duration <= maxduration,]
 
 # restrict analysis to 2001 to 2015
 tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]

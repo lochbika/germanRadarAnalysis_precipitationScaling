@@ -8,7 +8,7 @@ load(file = paste(dir_data, "tracks.database.RData", sep = ""))
 # convert distance to km
 tracks.database$Td_distance <- tracks.database$Td_distance / 1000
 
-# colors for scaling diagram
+# colors
 colors <- brewer.pal(5, "Set1")
 
 # do the analysis for specific months
@@ -32,6 +32,9 @@ tracks.database$season <- factor(tracks.database$season, levels = c("spring","su
 missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ1)
 print(paste("Number of missing values:", sum(missingEntries), sum(missingEntries)/dim(tracks.database)[1]*100, "%"))
 tracks.database <- tracks.database[!(missingEntries), ]
+
+# restrict analysis to 2001 to 2015
+tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]
 
 #
 # plot descriptive stats about dew point temperature

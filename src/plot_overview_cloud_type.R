@@ -29,9 +29,12 @@ tracks.database$CS_grid_valueQ2 <- factor(tracks.database$CS_grid_valueQ2, level
 tracks.database$season <- factor(tracks.database$season, levels = c("spring","summer","autumn"))
 
 # remove missing entries (Td and cloud type)
-missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ1)
+missingEntries <- is.na(tracks.database$Td_value) | is.na(tracks.database$CS_grid_valueQ1) | is.na(tracks.database$CS_grid_valueQ2)
 print(paste("Number of missing values:", sum(missingEntries), sum(missingEntries)/dim(tracks.database)[1]*100, "%"))
 tracks.database <- tracks.database[!(missingEntries), ]
+
+# restrict analysis to 2001 to 2015
+tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]
 
 # Q1
 # plot descriptive stats about dew point temperature 
@@ -69,11 +72,12 @@ ggsave(
   units = "cm"
 )
 
-pl <-
+pl.TdQ1 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ1)) +
+  ylim(0,15500) +
   theme_bw(base_size = pl.basesize) +
   theme(
     panel.spacing = unit(0, "line"),
@@ -92,7 +96,7 @@ pl <-
   )
 ggsave(
   paste(dir_plots, "Td_value_dist_by_precipTypeQ1_season.png", sep = ""),
-  plot = pl,
+  plot = pl.TdQ1,
   width = 6,
   height = 8,
   units = "cm"
@@ -134,11 +138,12 @@ ggsave(
   units = "cm"
 )
 
-pl <-
+pl.TdQ2 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
   xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
   facet_grid(rows = vars(CS_grid_valueQ2)) +
+  ylim(0,15500) +
   theme_bw(base_size = pl.basesize) +
   theme(
     panel.spacing = unit(0, "line"),
@@ -157,6 +162,58 @@ pl <-
   )
 ggsave(
   paste(dir_plots, "Td_value_dist_by_precipTypeQ2_season.png", sep = ""),
+  plot = pl.TdQ2,
+  width = 6,
+  height = 8,
+  units = "cm"
+)
+
+# Q2 - Q1
+# plot descriptive stats about dew point temperature 
+# taking precipitation type into account
+#
+
+bin.breaks <- seq(min(tracks.database$Td_value), max(tracks.database$Td_value), 0.5)
+bin.center <- bin.breaks[2:length(bin.breaks)] - 0.25
+
+Td.bins <- cut(tracks.database$Td_value, breaks = bin.breaks, labels = F, include.lowest = T)
+Td.bins <- bin.center[Td.bins]
+
+tracks.database$Td.bins <- Td.bins
+rm(Td.bins)
+
+Td.freqQ1 <- table(tracks.database$Td.bins, tracks.database$season, tracks.database$CS_grid_valueQ1)
+Td.freqQ2 <- table(tracks.database$Td.bins, tracks.database$season, tracks.database$CS_grid_valueQ2)
+
+Td.freq <- melt(Td.freqQ1)
+Td.freq$value <- melt(Td.freqQ2)$value - Td.freq$value
+
+colnames(Td.freq) <- c("Td_value", "season", "precType", "count")
+
+pl <-
+  ggplot(Td.freq, aes(x = Td_value, y=count, group = season, color = season)) +
+  geom_path(binwidth = 0.3) +
+  xlab(expression(paste(T[d], " [", degree, "C]"))) + xlim(-10, 25) +
+  facet_grid(rows = vars(precType)) +
+  ylim(-4000, 4000) +
+  theme_bw(base_size = pl.basesize) +
+  theme(
+    panel.spacing = unit(0, "line"),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    strip.text = element_text(size = pl.basesize),
+    legend.position = "None",
+    legend.justification = c("right", "top"),
+    legend.background = element_blank(),
+    plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
+    axis.text = element_text(size = pl.basesize),
+    legend.title = element_blank(),
+    legend.text = element_text(size = pl.basesize),
+    legend.key.height = unit(.5, "line"),
+    axis.title.y = element_text(size = pl.basesize)
+  )
+ggsave(
+  paste(dir_plots, "Td_value_dist_by_precipType_season_difference.png", sep = ""),
   plot = pl,
   width = 6,
   height = 8,

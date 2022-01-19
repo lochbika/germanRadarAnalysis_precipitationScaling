@@ -66,6 +66,7 @@ ahead_time <-
              origin = "1970-01-01 00:00")
 
 tracks.database$Td_value <- rep(NA, dim(tracks.database)[1])
+tracks.database$TT_value <- rep(NA, dim(tracks.database)[1])
 tracks.database$Td_distance <- rep(NA, dim(tracks.database)[1])
 for (track in 1:dim(tracks.database)[1]) {
   if (track %% 1000 == 0)
@@ -74,7 +75,9 @@ for (track in 1:dim(tracks.database)[1]) {
   trystation <- 1
   temp <-
     stationdataTD[[as.character(tracksandstations[["stationIDs"]][track, trystation])]]
-  selectedTd <- temp$TD[temp$datetime == ahead_time[track]]
+  match.date <- temp$datetime == ahead_time[track]
+  selectedTd <- temp$TD[match.date]
+  selectedTT <- temp$TT[match.date]
   selectedDist <-
     tracksandstations[["distances"]][track, trystation]
   while ((length(selectedTd) == 0 |
@@ -82,16 +85,20 @@ for (track in 1:dim(tracks.database)[1]) {
     trystation <- trystation + 1
     temp <-
       stationdataTD[[as.character(tracksandstations[["stationIDs"]][track, trystation])]]
-    selectedTd <- temp$TD[temp$datetime == ahead_time[track]]
+    match.date <- temp$datetime == ahead_time[track]
+    selectedTd <- temp$TD[match.date]
+    selectedTT <- temp$TT[match.date]
     selectedDist <-
       tracksandstations[["distances"]][track, trystation]
   }
   if (length(selectedTd) == 0 |
       isTRUE(is.na(selectedTd))) {
     tracks.database$Td_value[track] <- NA
+    tracks.database$TT_value[track] <- NA
     tracks.database$Td_distance[track] <- NA
   } else{
     tracks.database$Td_value[track] <- selectedTd
+    tracks.database$TT_value[track] <- selectedTT
     tracks.database$Td_distance[track] <- selectedDist
   }
 }

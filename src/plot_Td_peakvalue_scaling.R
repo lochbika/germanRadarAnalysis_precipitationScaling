@@ -14,7 +14,7 @@ months.selected <- matrix(months, ncol = 3, byrow = TRUE)
 # label the seasons
 tracks.database$season <- ""
 for (season in 1:3) {
-  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season, ]] <-
+  tracks.database$season[format(tracks.database$datetime, "%m") %in% months.selected[season,]] <-
     seasons[season]
 }
 
@@ -43,19 +43,21 @@ print(paste(
   sum(missingEntries) / dim(tracks.database)[1] * 100,
   "%"
 ))
-tracks.database <- tracks.database[!(missingEntries),]
+tracks.database <- tracks.database[!(missingEntries), ]
 
 # use only tracks that have a Td_distance < 25km
 tracks.database <-
-  tracks.database[tracks.database$Td_distance <= dewpoint_stationradius,]
+  tracks.database[tracks.database$Td_distance <= dewpoint_stationradius, ]
 # use only tracks that are up to 2 hours long
-tracks.database <- tracks.database[tracks.database$duration <= maxduration,]
+tracks.database <-
+  tracks.database[tracks.database$duration <= maxduration, ]
 
 # restrict analysis to 2001 to 2015
-tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001,2015)), ]
+tracks.database <-
+  tracks.database[format(tracks.database$datetime, "%Y") %in% as.character(seq(2001, 2015)),]
 
 # Td must be at least 0 degC
-tracks.database <- tracks.database[tracks.database$Td_value>=0,]
+tracks.database <- tracks.database[tracks.database$Td_value >= 0, ]
 
 #
 # first all in one; do not distinguish between precipitation types
@@ -85,21 +87,7 @@ scaling.df$percentile <-
   rep(paste("p", prct * 100, sep = ""), each = dim(Td.bins$bmean)[1])
 
 ## create a data frame with values for the scaling lines
-x <- seq(-1, 25, .1)
-y <- exp(0.07 * x - 5)
-scal.lines <- cbind(lin = rep(-5, length(x)),
-                    x = x,
-                    y = y)
-for (i in seq(-4.6, 5, .4)) {
-  y <- exp(0.07 * x + i)
-  scal.lines <-
-    rbind(scal.lines, cbind(
-      lin = rep(i, length(x)),
-      x = x,
-      y = y
-    ))
-}
-scal.lines <- as.data.frame(scal.lines)
+scal.lines <- genScalingLines(r = 0.14)
 
 pl.scal.cell <-
   ggplot(
@@ -141,11 +129,20 @@ pl.scal.cell <-
   ) +
   xlab(expression(T[d] * " [" * degree * "C]")) +
   geom_path(
-    data = scal.lines,
+    data = genScalingLines(),
     aes(x = x, y = y, group = lin),
     inherit.aes = F,
     col = "grey",
-    linetype = 2
+    linetype = 2,
+    size = 0.35
+  ) +
+  geom_path(
+    data = genScalingLines(r = 0.14),
+    aes(x = x, y = y, group = lin),
+    inherit.aes = F,
+    col = "orange",
+    linetype = 2,
+    size = 0.35
   ) +
   xlim(0, 20)
 
@@ -169,7 +166,7 @@ ggsave(
 for (pType in precipitationTypes) {
   # select tracks with precipitation type
   tracks.selected <-
-    tracks.database[tracks.database$CS_grid_valueQ2 == pType,]
+    tracks.database[tracks.database$CS_grid_valueQ2 == pType, ]
   
   # bin Td data
   Td.bins <-
@@ -193,9 +190,9 @@ for (pType in precipitationTypes) {
   scaling.df$precipType <- rep(pType, length(prct))
   scaling.df$percentile <-
     rep(paste("p", prct * 100, sep = ""), each = dim(Td.bins$bmean)[1])
-  if(exists("scaling.final")){
+  if (exists("scaling.final")) {
     scaling.final <- rbind(scaling.final, scaling.df)
-  }else{
+  } else{
     scaling.final <- scaling.df
   }
 }
@@ -203,21 +200,7 @@ scaling.df <- scaling.final
 rm(scaling.final)
 
 ## create a data frame with values for the scaling lines
-x <- seq(-1, 25, .1)
-y <- exp(0.07 * x - 5)
-scal.lines <- cbind(lin = rep(-5, length(x)),
-                    x = x,
-                    y = y)
-for (i in seq(-4.6, 5, .4)) {
-  y <- exp(0.07 * x + i)
-  scal.lines <-
-    rbind(scal.lines, cbind(
-      lin = rep(i, length(x)),
-      x = x,
-      y = y
-    ))
-}
-scal.lines <- as.data.frame(scal.lines)
+scal.lines <- genScalingLines()
 
 pl.scal.cell <-
   ggplot(
@@ -260,11 +243,20 @@ pl.scal.cell <-
   ) +
   xlab(expression(T[d] * " [" * degree * "C]")) +
   geom_path(
-    data = scal.lines,
+    data = genScalingLines(),
     aes(x = x, y = y, group = lin),
     inherit.aes = F,
     col = "grey",
-    linetype = 2
+    linetype = 2,
+    size = 0.35
+  ) +
+  geom_path(
+    data = genScalingLines(r = 0.14),
+    aes(x = x, y = y, group = lin),
+    inherit.aes = F,
+    col = "orange",
+    linetype = 2,
+    size = 0.35
   ) +
   xlim(0, 20)
 
@@ -285,7 +277,7 @@ for (season in 1:dim(months.selected)[1]) {
   # select tracks by function
   tracks.selected <-
     tracks.database[tracks.database$season == seasons[season] &
-                      format(tracks.database$datetime, "%Y") %in% c("2007", "2008"), ]
+                      format(tracks.database$datetime, "%Y") %in% c("2007", "2008"),]
   
   # bin Td data
   Td.bins <-
@@ -318,21 +310,7 @@ for (season in 1:dim(months.selected)[1]) {
   #############
   
   ## create a data frame with values for the scaling lines
-  x <- seq(3, 22, .1)
-  y <- exp(0.07 * x - 5)
-  scal.lines <- cbind(lin = rep(-5, length(x)),
-                      x = x,
-                      y = y)
-  for (i in seq(-4.6, 5, .4)) {
-    y <- exp(0.07 * x + i)
-    scal.lines <-
-      rbind(scal.lines, cbind(
-        lin = rep(i, length(x)),
-        x = x,
-        y = y
-      ))
-  }
-  scal.lines <- as.data.frame(scal.lines)
+  scal.lines <- genScalingLines()
   
   pl.scal.cell <-
     ggplot(
@@ -375,11 +353,20 @@ for (season in 1:dim(months.selected)[1]) {
     ) +
     xlab(expression(T[d] * " [" * degree * "C]")) +
     geom_path(
-      data = scal.lines,
+      data = genScalingLines(),
       aes(x = x, y = y, group = lin),
       inherit.aes = F,
       col = "grey",
-      linetype = 2
+      linetype = 2,
+      size = 0.35
+    ) +
+    geom_path(
+      data = genScalingLines(r = 0.14),
+      aes(x = x, y = y, group = lin),
+      inherit.aes = F,
+      col = "orange",
+      linetype = 2,
+      size = 0.35
     ) +
     xlim(5, 20)
   

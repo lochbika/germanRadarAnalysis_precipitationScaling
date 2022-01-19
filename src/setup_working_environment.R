@@ -74,3 +74,23 @@ binequal <- function(x, n = 5, fixed.width = NULL, members = FALSE) {
   return(classes)
   #
 }
+
+# generate scaling lines for plots
+genScalingLines <- function(r = 0.07, x.from = -1, x.to = 25, y.from = -4.6, y.to = 5, x.step = 0.1, y.step = 0.4){
+  x <- seq(x.from, x.to, x.step)
+  y <- exp(r * x - y.to)
+  scal.lines <- cbind(lin = rep(-1*y.to, length(x)),
+                      x = x,
+                      y = y)
+  for (i in seq(y.from, y.to, y.step)) {
+    y <- exp(r * x + i)
+    scal.lines <-
+      rbind(scal.lines, cbind(
+        lin = rep(i, length(x)),
+        x = x,
+        y = y
+      ))
+  }
+  scal.lines <- as.data.frame(scal.lines)
+  return(scal.lines)
+}

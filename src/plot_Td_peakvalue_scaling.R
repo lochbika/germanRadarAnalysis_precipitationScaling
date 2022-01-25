@@ -80,6 +80,15 @@ scaling <-
   )
 
 scaling$Group.1 <- Td.bins$bmean[as.character(scaling$Group.1), 2]
+
+# calculate scaling rate based on linear fit of log-transformed data
+for(i in 1:length(prct)) {
+  fit <- lm(log(scaling$x[, i]) ~ scaling$Group.1)
+  print(paste("Scaling rate,", prct[i]*100,"%", round(fit$coefficients[2] * 100, digits =
+                                        2)))
+}
+
+
 scaling.df <- data.frame(value = as.vector(scaling$x))
 scaling.df$Td <- rep(scaling$Group.1, length(prct))
 #scaling.df$precipType <- rep(scaling$Group.2, length(prct))
@@ -185,6 +194,14 @@ for (pType in precipitationTypes) {
     )
   
   scaling$Group.1 <- Td.bins$bmean[as.character(scaling$Group.1), 2]
+  
+  # calculate scaling rate based on linear fit of log-transformed data
+  for(i in 1:length(prct)) {
+    fit <- lm(log(scaling$x[, i]) ~ scaling$Group.1)
+    print(paste("Scaling rate,",pType, prct[i]*100,"%", round(fit$coefficients[2] * 100, digits =
+                                                          2)))
+  }
+  
   scaling.df <- data.frame(value = as.vector(scaling$x))
   scaling.df$Td <- rep(scaling$Group.1, length(prct))
   scaling.df$precipType <- rep(pType, length(prct))

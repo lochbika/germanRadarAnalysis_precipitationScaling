@@ -59,38 +59,6 @@ tracks.database <- tracks.database[format(tracks.database$datetime, "%Y") %in% a
 # taking precipitation type into account
 #
 
-# pl <-
-#   ggplot(tracks.database,
-#          aes(x = Td_distance, group = season, color = season)) +
-#   geom_freqpoly(bins = 100) +
-#   geom_freqpoly(data=tracks.database, bins = 100, aes(x=Td_distance), inherit.aes = FALSE) +
-#   xlab("distance [km]") + 
-#   facet_grid(rows = vars(CS_grid_valueQ1)) +
-#   theme_bw(base_size = pl.basesize) +
-#   theme(
-#     panel.spacing = unit(0, "line"),
-#     strip.background = element_blank(),
-#     strip.placement = 'outside',
-#     strip.text = element_text(size = pl.basesize),
-#     legend.position = c(1, 1),
-#     legend.justification = c("right", "top"),
-#     legend.background = element_blank(),
-#     plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
-#     axis.text = element_text(size = pl.basesize),
-#     legend.title = element_blank(),
-#     legend.text = element_text(size = pl.basesize),
-#     legend.key.height = unit(.5, "line"),
-#     axis.title.y = element_text(size = pl.basesize)
-#   )
-# 
-# ggsave(
-#   paste(dir_plots, "Td_distance_dist_by_precipTypeQ1_season.png", sep = ""),
-#   plot = pl,
-#   width = 6,
-#   height = 8,
-#   units = "cm"
-# )
-
 pl.TdQ1 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
   geom_freqpoly(binwidth = 0.3) +
@@ -126,37 +94,6 @@ ggsave(
 # plot descriptive stats about dew point temperature 
 # taking precipitation type into account
 #
-
-# pl <-
-#   ggplot(tracks.database,
-#          aes(x = Td_distance, group = season, color = season)) +
-#   geom_freqpoly(bins = 100) +
-#   xlab("distance [km]") + 
-#   facet_grid(rows = vars(CS_grid_valueQ2)) +
-#   theme_bw(base_size = pl.basesize) +
-#   theme(
-#     panel.spacing = unit(0, "line"),
-#     strip.background = element_blank(),
-#     strip.placement = 'outside',
-#     strip.text = element_text(size = pl.basesize),
-#     legend.position = c(1, 1),
-#     legend.justification = c("right", "top"),
-#     legend.background = element_blank(),
-#     plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
-#     axis.text = element_text(size = pl.basesize),
-#     legend.title = element_blank(),
-#     legend.text = element_text(size = pl.basesize),
-#     legend.key.height = unit(.5, "line"),
-#     axis.title.y = element_text(size = pl.basesize)
-#   )
-# 
-# ggsave(
-#   paste(dir_plots, "Td_distance_dist_by_precipTypeQ2_season.png", sep = ""),
-#   plot = pl,
-#   width = 6,
-#   height = 8,
-#   units = "cm"
-# )
 
 pl.TdQ2 <-
   ggplot(tracks.database, aes(x = Td_value, group = season, color = season)) +
@@ -243,6 +180,42 @@ pl <-
 ggsave(
   paste(dir_plots, "Td_value_dist_by_precipType_season_difference.png", sep = ""),
   plot = pl,
+  width = 6,
+  height = 8,
+  units = "cm"
+)
+
+# Q2
+# plot descriptive stats about temperature 
+# taking precipitation type into account
+#
+
+pl.TTQ2 <-
+  ggplot(tracks.database, aes(x = TT_value, group = season, color = season)) +
+  geom_freqpoly(binwidth = 0.3) +
+  geom_freqpoly(data=tracks.database, binwidth = 0.3, aes(x=TT_value, color = "all"), inherit.aes = FALSE) +
+  xlab(expression(paste(T, " [", degree, "C]"))) + xlim(-10, 30) +
+  facet_grid(rows = vars(CS_grid_valueQ2)) +
+  ylim(0,15000) +
+  theme_bw(base_size = pl.basesize) +
+  theme(
+    panel.spacing = unit(0, "line"),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    strip.text = element_text(size = pl.basesize),
+    legend.position = "None",
+    legend.justification = c("right", "top"),
+    legend.background = element_blank(),
+    plot.margin = margin(0.1, 0.05, 0.1, 0.1, "cm"),
+    axis.text = element_text(size = pl.basesize),
+    legend.title = element_blank(),
+    legend.text = element_text(size = pl.basesize),
+    legend.key.height = unit(.5, "line"),
+    axis.title.y = element_text(size = pl.basesize)
+  )
+ggsave(
+  paste(dir_plots, "TT_value_dist_by_precipTypeQ2_season.png", sep = ""),
+  plot = pl.TTQ2,
   width = 6,
   height = 8,
   units = "cm"

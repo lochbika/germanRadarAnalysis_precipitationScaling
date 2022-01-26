@@ -9,14 +9,14 @@ To successfully run the analysis you will need two data sets.
 
 Extract both data sets into a subfolder named data.
 
-## How to run the R scripts
+## R scripts
 This repository includes a RStudio project file. Of course, you can still use other IDEs to run the code.
 Scripts are in src/, data in data/ and plots will be saved in the plots/ directory.
 Make sure to adjust your working directory in the src/setup_working_environment.R script.
 
 Always run the src/setup_working_environment.R script at least once in each new R session before executing any other code.
 
-# Connect events to dew point and precipitation type data
+### Connect events to dew point and precipitation type data
 
 Open the RStudio project file in RStudio or use your favorite way of running R scripts.
 
@@ -25,5 +25,14 @@ Open the RStudio project file in RStudio or use your favorite way of running R s
 3. run the src/connect_tracks_with_dewpoint.R script to connect each track with a co-located dew point record (3 hours prior to the event)
 4. finally, run the src/connect_tracks_with_gridded_precipitationtype.R. This will add the precipitation type criteria to the tracks database.
 
-# The final data set
+### Analysis scripts
+The src/ directory contains a number of other scripts and development continues. Most notably, though, are the following source files:
+
+ - plot_Td_peakvalue_scaling.R
+ - plot_overview_dewpoint.R
+ - plot_overview_cloud_type.R
+
+Please, use and adapt these scripts to your preference.
+
+## The final data set
 The final data set can be downloaded from [here.](https://drive.google.com/file/d/1jgTmPbuKKYghKAnC1dvUDZZ9dpSeNcuY/view?usp=sharing)
